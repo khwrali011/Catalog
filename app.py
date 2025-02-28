@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
+from sql_queries import mark_lecture_expired
 
 app = Flask(__name__)
 
@@ -68,6 +69,32 @@ def start_lecture():
         print(f"Error occured in checking lecture status: {e}")
         return jsonify({"error": "Client authentication failed"}), 401
 
+@app.route('/end_lecture', methods=['POST'])
+def end_lecture():
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+
+    if 'enc_lecture_Id' not in data:
+        return jsonify({"error": "Missing clientId or lectureId"}), 400
+
+    encrypted_client_id = request.headers.get('Authorization')
+    encrypted_lecture_id = data.get('enc_lecture_Id')
+
+    if not encrypted_client_id or not encrypted_lecture_id:
+        return jsonify({"error": "Missing encrypted values"}), 400
+
+    # Decrypt values
+    try:
+        client_id = generate_decryption(encrypted_client_id)
+        lecture_id = generate_decryption(encrypted_lecture_id)
+    except Exception:
+        return jsonify({"error": "Invalid encrypted data"}), 401
+
+    # Mark lecture as expired
+    update_status = mark_lecture_expired(client_id, lecture_id)
+    return jsonify(update_status)
 
 if __name__ == '__main__':
     app.run(debug=True)

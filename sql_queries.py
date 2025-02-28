@@ -140,3 +140,24 @@ def get_client_lecture_details(client_id, lecture_id):
     }
 
     return encrypted_data
+
+def mark_lecture_expired(client_id, lecture_id):
+    """
+    Marks the lecture as expired by setting isExpired to True.
+    """
+    query = """
+    UPDATE lectures
+    SET is_expired = TRUE
+    WHERE client_id = %s AND lecture_id = %s;
+    """
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(query, (client_id, lecture_id))
+    conn.commit()
+    
+    cursor.close()
+    conn.close()
+    
+    return {"message": "Lecture ended successfully"}
