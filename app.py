@@ -1,47 +1,75 @@
 from flask import Flask, request, jsonify
-from sql_queries import check_client, return_client_data
+from cryptography.fernet import Fernet
+import base64
+import hashlib
+import json
+import os
+from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details
 
 app = Flask(__name__)
 
-@app.route('/get_client_detail', methods=['POST'])
-def get_client_detail():
-    if request.is_json:
-        data = request.get_json()
+# Load encryption key from JSON
+App_Directory = os.path.dirname(__file__)
+credentials_path = os.path.join(App_Directory, "credenials.json")
 
-        if 'clientId' not in data:
-            return jsonify({"error": "Request must contain client id"}), 400
-        
-        client_id = data['clientId']
+with open(credentials_path, "r") as file:
+    data = json.load(file)
 
-        if client_id.strip() == "":
-            return jsonify({"error": "Client id cannot be empty"}), 400
+custom_key = data['encryptionkey']
+hashed_key = hashlib.sha256(custom_key.encode()).digest()
+fernet_key = base64.urlsafe_b64encode(hashed_key)
+fernet = Fernet(fernet_key)
 
-        enc_client_id = request.headers.get('Authorization')
-
-        # Check if Authorization header is missing or empty
-        if not enc_client_id:
-            return jsonify({"error": "Authorization header is missing"}), 401
-        
-        try:
-            auth_status = check_client(client_id, enc_client_id)
-            print(f"\n\nAuth Status: {auth_status}\n\n")
-            if auth_status == "0":
-                return jsonify({"error": "Client could not be verified"}), 400
-            pass
-        
-        except Exception as e:
-            print(f"Error in checking authentication of client: {e}")
-            return jsonify({"error": "Error in client authorization"}), 400
-        
-        try:
-            client_data = return_client_data(client_id)
-            return client_data, 200
-        except Exception as e:
-            print(f"Error in executing qurie: {e}")
-            return jsonify({"error": "Query Failed!"}), 400
-        
-    else:
+@app.route('/start_lecture', methods=['POST'])
+def start_lecture():
+    if not request.is_json:
         return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+    if 'lectureId' not in data:
+        return jsonify({"error": "Missing clientId or lectureId"}), 400
+
+    encrypted_client_id = request.headers.get('Authorization')
+    lecture_id = data['lectureId']
+
+    if not encrypted_client_id or not lecture_id:
+        return jsonify({"error": "Missing encrypted values"}), 400
+
+    # Decrypt Client ID
+    try:
+        client_id = fernet.decrypt(encrypted_client_id.encode()).decode()
+    except Exception:
+        return jsonify({"error": "Invalid clientId"}), 401
+    
+    try:
+        client_status = authenticate_client(client_id)
+        if client_status["status"] == "success":
+            pass
+        else:
+            return client_status
+    except Exception as e:
+        print(f"Error occured in checking client status: {e}")
+        return jsonify({"error": "Client authentication failed"}), 401
+    
+    try:
+        lecture_status = insert_lecture(client_id, lecture_id)
+        if lecture_status["message"] == "Lecture started successfully":
+            pass
+        else:
+            return lecture_status
+    except Exception as e:
+        print(f"Error occured in checking lecture status: {e}")
+        return jsonify({"error": "Client authentication failed"}), 401
+    
+    try:
+        portal_client = get_client_lecture_details(client_id, lecture_id)
+        return portal_client
+    except Exception as e:
+        print(f"Error occured in checking lecture status: {e}")
+        return jsonify({"error": "Client authentication failed"}), 401
+    
+    return "ok"
+
 
 if __name__ == '__main__':
     app.run(debug=True)

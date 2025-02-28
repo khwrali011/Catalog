@@ -23,68 +23,98 @@ fernet_key = base64.urlsafe_b64encode(hashed_key)
 
 # Initialize Fernet with the derived key
 fernet = Fernet(fernet_key)
-    
-def check_client(clientId, enc_client_id):
-    """
-        input: clientId: INT
-        enc_client_id: str (Encrypted client Id)
-        output: Client id decryption
-    """
 
-    # Decrypt the encypted id
-    try:
-        dec_client_id = fernet.decrypt(enc_client_id.encode()).decode()
-    except Exception as e:
-        print(f"Decryption error: {e}")
-        return "0"
-
-    return "1" if clientId == dec_client_id else "0"
-    
-def return_client_data(clientId):
+def authenticate_client(client_id):
     """
-        input: clientId: INT
-        output: Queries on db and return client data
+    Authenticate the client by checking if clientId exists and is active.
     """
-    get_info_query = """
-    SELECT 
-        c.clientId,
-        c.clientName,
-        c.clientLicenseKey,
-        c.responseAPI,
-        c.lectureRouteUrl,
-        c.lectureRouteUrlServer,
-        c.lectureDetailUrl,
-        c.isActive AS clientIsActive,
-        c.createdOn AS clientCreatedOn,
-        r.relationId,
-        r.total_lectures,
-        r.remaining_lecture,
-        r.activation_date,
-        r.isactive AS relationIsActive,
-        r.createOn AS relationCreatedOn,
-        p.packageId,
-        p.packageTitle,
-        p.packageDescription,
-        p.packageprice,
-        p.packagetypeId
-    FROM rectureai.tbl_client c
-    LEFT JOIN rectureai.tbl_relation_client_package r ON c.clientId = r.clientId
-    LEFT JOIN rectureai.tbl_packages p ON r.packageId = p.packageId
-    WHERE c.clientId = %s;
+    query = """
+    SELECT clientId, client_auth, isActive 
+    FROM tbl_client 
+    WHERE clientId = %s AND isActive = 1;
     """
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(get_info_query, (clientId,))
     
-    # Fetch the first row instead of all
-    row = cursor.fetchone()
+    cursor.execute(query, (client_id,))
+    client_data = cursor.fetchone()
 
-    # Close connection
     cursor.close()
     conn.close()
 
-    if row:
-        return row
+    if client_data:
+        return {"status": "success", "clientId": client_data["clientId"]}
     else:
-        return json.dumps({"error": "No data found for the given clientId"}, indent=4)
+        return {"status": "error", "message": "Client authentication failed or inactive"}
+    
+def insert_lecture(client_id, lecture_id):
+    """
+    Insert a new lecture record into the lectures table.
+    Ensures that duplicate lectures are not inserted.
+    """
+    query_check = "SELECT COUNT(*) FROM lectures WHERE client_id = %s AND lecture_id = %s"
+    query_insert = """
+    INSERT INTO lectures (client_id, lecture_id, lecture_start_date) 
+    VALUES (%s, %s, NOW())
+    """
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Check for existing lecture
+    cursor.execute(query_check, (client_id, lecture_id))
+    count = cursor.fetchone()[0]
+
+    if count > 0:
+        cursor.close()
+        conn.close()
+        return {"message": "Lecture already recorded"}
+
+    # Insert new lecture
+    cursor.execute(query_insert, (client_id, lecture_id))
+    conn.commit()
+    
+    cursor.close()
+    conn.close()
+    
+    return {"message": "Lecture started successfully"}
+
+def get_client_lecture_details(client_id, lecture_id):
+    """
+    Fetch client and lecture details from DB, then encrypt sensitive fields.
+    """
+    query = """
+    SELECT 
+        tbl_client.clientId,
+        tbl_client.responseAPI,
+        tbl_client.isActive,
+        tbl_client.lectureRouteUrl
+    FROM 
+        tbl_client
+    WHERE 
+        clientId = %s;
+    """
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute(query, (client_id,))
+    result = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not result:
+        return {"error": "No records found for the given clientId"}
+
+    # Encrypt the required fields
+    encrypted_data = {
+        "encrypted_client_id": fernet.encrypt(str(result["clientId"]).encode()).decode(),
+        "encrypted_lecture_id": fernet.encrypt(lecture_id.encode()).decode(),
+        "encrypted_responseAPI": fernet.encrypt(result["responseAPI"].encode()).decode(),
+        "isActive": result["isActive"],  # No encryption for isActive
+        "lectureRouteUrl": result["lectureRouteUrl"]  # No encryption for lectureRouteUrl
+    }
+
+    return encrypted_data
