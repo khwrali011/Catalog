@@ -1,10 +1,7 @@
 from flask import Flask, request, jsonify
-from cryptography.fernet import Fernet
-import base64
-import hashlib
 import json
 import os
-from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details
+from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 
 app = Flask(__name__)
 
@@ -14,11 +11,6 @@ credentials_path = os.path.join(App_Directory, "credenials.json")
 
 with open(credentials_path, "r") as file:
     data = json.load(file)
-
-custom_key = data['encryptionkey']
-hashed_key = hashlib.sha256(custom_key.encode()).digest()
-fernet_key = base64.urlsafe_b64encode(hashed_key)
-fernet = Fernet(fernet_key)
 
 @app.route('/start_lecture', methods=['POST'])
 def start_lecture():
@@ -34,12 +26,16 @@ def start_lecture():
 
     if not encrypted_client_id or not lecture_id:
         return jsonify({"error": "Missing encrypted values"}), 400
+    
+    # return str(encrypted_client_id)
 
     # Decrypt Client ID
     try:
-        client_id = fernet.decrypt(encrypted_client_id.encode()).decode()
+        client_id = generate_decryption(str(encrypted_client_id))
     except Exception:
         return jsonify({"error": "Invalid clientId"}), 401
+
+    # return str(client_id)
     
     try:
         client_status = authenticate_client(client_id)
@@ -51,6 +47,8 @@ def start_lecture():
         print(f"Error occured in checking client status: {e}")
         return jsonify({"error": "Client authentication failed"}), 401
     
+    # return client_status
+    
     try:
         lecture_status = insert_lecture(client_id, lecture_id)
         if lecture_status["message"] == "Lecture started successfully":
@@ -61,14 +59,14 @@ def start_lecture():
         print(f"Error occured in checking lecture status: {e}")
         return jsonify({"error": "Client authentication failed"}), 401
     
+    # return lecture_status
+    
     try:
         portal_client = get_client_lecture_details(client_id, lecture_id)
         return portal_client
     except Exception as e:
         print(f"Error occured in checking lecture status: {e}")
         return jsonify({"error": "Client authentication failed"}), 401
-    
-    return "ok"
 
 
 if __name__ == '__main__':

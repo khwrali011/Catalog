@@ -1,6 +1,7 @@
 import json
 from connect import get_db_connection
-from cryptography.fernet import Fernet
+# from cryptography.fernet import Fernet
+from Cryptodome.Cipher import AES
 import base64
 import hashlib
 from pathlib import Path
@@ -17,12 +18,31 @@ with open(credentials_path, "r") as file:
 # Custom key 
 custom_key = data['encryptionkey']
 
-# Derive a 32-byte key using SHA256 and then base64 encode it
+# Generate a 32-byte key using SHA-256
 hashed_key = hashlib.sha256(custom_key.encode()).digest()
-fernet_key = base64.urlsafe_b64encode(hashed_key)
 
-# Initialize Fernet with the derived key
-fernet = Fernet(fernet_key)
+# Use a fixed IV (MUST be 16 bytes)
+iv = b'0123456789abcdef'
+
+# Pad client_id to be multiple of 16 bytes
+def pad(data):
+    return data + (16 - len(data) % 16) * chr(16 - len(data) % 16)
+
+def unpad(data):
+    return data[:-ord(data[-1])]
+
+def generate_encryption(input):
+    cipher = AES.new(hashed_key, AES.MODE_CBC, iv)
+    encrypted = cipher.encrypt(pad(input).encode())
+    enc_input = base64.b64encode(encrypted).decode()
+    return enc_input
+
+def generate_decryption(input):
+    cipher = AES.new(hashed_key, AES.MODE_CBC, iv)
+    decrypted_input = unpad(cipher.decrypt(base64.b64decode(input)).decode())
+    return decrypted_input
+
+# print(generate_decryption("B2O01IfDnTo8hiSSTUJSag=="))
 
 def authenticate_client(client_id):
     """
@@ -107,12 +127,14 @@ def get_client_lecture_details(client_id, lecture_id):
 
     if not result:
         return {"error": "No records found for the given clientId"}
+    
+    # return result
 
     # Encrypt the required fields
     encrypted_data = {
-        "encrypted_client_id": fernet.encrypt(str(result["clientId"]).encode()).decode(),
-        "encrypted_lecture_id": fernet.encrypt(lecture_id.encode()).decode(),
-        "encrypted_responseAPI": fernet.encrypt(result["responseAPI"].encode()).decode(),
+        "encrypted_client_id": generate_encryption(str(result["clientId"])),
+        "encrypted_lecture_id": generate_encryption(lecture_id),
+        "encrypted_responseAPI": generate_encryption(str(result["responseAPI"])),
         "isActive": result["isActive"],  # No encryption for isActive
         "lectureRouteUrl": result["lectureRouteUrl"]  # No encryption for lectureRouteUrl
     }
