@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
-from sql_queries import mark_lecture_expired
+from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client
 
 app = Flask(__name__)
 
@@ -95,6 +95,47 @@ def end_lecture():
     # Mark lecture as expired
     update_status = mark_lecture_expired(client_id, lecture_id)
     return jsonify(update_status)
+
+@app.route('/get_client_info', methods=['POST'])
+def get_client_info():
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+
+    if 'enc_lecture_Id' not in data:
+        return jsonify({"error": "Missing clientId or lectureId"}), 400
+
+    encrypted_client_id = request.headers.get('Authorization')
+    encrypted_lecture_id = data.get('enc_lecture_Id')
+    if not encrypted_client_id or not encrypted_lecture_id:
+        return jsonify({"error": "Missing encrypted values"}), 400
+
+    # Decrypt values
+    try:
+        client_id = generate_decryption(encrypted_client_id)
+        lecture_id = generate_decryption(encrypted_lecture_id)
+    except Exception:
+        return jsonify({"error": "Invalid encrypted data"}), 401
+    
+    try:
+        lecture_status = check_lecture_expiry(lecture_id)
+        # print(f"Lecture Status: {lecture_status}")
+        # return lecture_status
+        lecture_status = str(lecture_status)
+        if lecture_status == "1":
+            return jsonify({"Message": "Lecture has been expired!"}), 200
+    
+    except Exception as e:
+        print(f"Error Occured in checking lecture status: {e}")
+        return jsonify({"error": "Lecture Validation Failed!"}), 401
+
+    try:
+        client = get_client(client_id)
+        return client
+    except Exception as e:
+        print(f"Error occured in getting client: {e}")
+        return jsonify({"error": "Client Retrieval Failed!"}), 401
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -161,3 +161,43 @@ def mark_lecture_expired(client_id, lecture_id):
     conn.close()
     
     return {"message": "Lecture ended successfully"}
+
+def check_lecture_expiry(lecture_id):
+    """
+    Check if the lecture is expired or not.
+    """
+    query = f"""
+    SELECT is_expired FROM lectures WHERE lecture_id = {lecture_id};
+    """
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(query)
+    result = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+    # print(f"Result: {type(result)}")
+    status = str(result[0])
+    # print(f"Status: {type(status)}")
+    return status
+
+def get_client(client_id):
+    """
+    Get Client Info from db.
+    """
+    query = f"""
+    SELECT * FROM tbl_client WHERE clientId = {client_id};
+    """
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute(query)
+    result = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+    print(f"Result: {result}")
+    return result
