@@ -89,7 +89,7 @@ def insert_lecture(client_id, lecture_id):
     if count > 0:
         cursor.close()
         conn.close()
-        return {"message": "Lecture already recorded"}
+        return {"message": "Lecture being recorded!"}
 
     # Insert new lecture
     cursor.execute(query_insert, (client_id, lecture_id))

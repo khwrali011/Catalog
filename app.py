@@ -76,19 +76,18 @@ def end_lecture():
 
     data = request.get_json()
 
-    if 'enc_lecture_Id' not in data:
+    if 'lecture_Id' not in data:
         return jsonify({"error": "Missing clientId or lectureId"}), 400
 
     encrypted_client_id = request.headers.get('Authorization')
-    encrypted_lecture_id = data.get('enc_lecture_Id')
+    lecture_id = data.get('lecture_Id')
 
-    if not encrypted_client_id or not encrypted_lecture_id:
-        return jsonify({"error": "Missing encrypted values"}), 400
+    if not encrypted_client_id or not lecture_id:
+        return jsonify({"error": "Missing values"}), 400
 
     # Decrypt values
     try:
         client_id = generate_decryption(encrypted_client_id)
-        lecture_id = generate_decryption(encrypted_lecture_id)
     except Exception:
         return jsonify({"error": "Invalid encrypted data"}), 401
 
@@ -103,18 +102,17 @@ def get_client_info():
 
     data = request.get_json()
 
-    if 'enc_lecture_Id' not in data:
+    if 'lecture_Id' not in data:
         return jsonify({"error": "Missing clientId or lectureId"}), 400
 
     encrypted_client_id = request.headers.get('Authorization')
-    encrypted_lecture_id = data.get('enc_lecture_Id')
-    if not encrypted_client_id or not encrypted_lecture_id:
-        return jsonify({"error": "Missing encrypted values"}), 400
+    lecture_id = data.get('lecture_Id')
+    if not encrypted_client_id or not lecture_id:
+        return jsonify({"error": "Missing values"}), 400
 
     # Decrypt values
     try:
         client_id = generate_decryption(encrypted_client_id)
-        lecture_id = generate_decryption(encrypted_lecture_id)
     except Exception:
         return jsonify({"error": "Invalid encrypted data"}), 401
     
