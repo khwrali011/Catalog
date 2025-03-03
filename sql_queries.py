@@ -145,9 +145,14 @@ def mark_lecture_expired(client_id, lecture_id):
     """
     Marks the lecture as expired by setting isExpired to True.
     """
+    # query = """
+    # UPDATE lectures
+    # SET is_expired = TRUE
+    # WHERE client_id = %s AND lecture_id = %s;
+    # """
     query = """
     UPDATE lectures
-    SET is_expired = TRUE
+    SET is_expired = TRUE, lecture_end_date = NOW()
     WHERE client_id = %s AND lecture_id = %s;
     """
     
