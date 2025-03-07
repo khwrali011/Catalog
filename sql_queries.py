@@ -206,3 +206,46 @@ def get_client(client_id):
     conn.close()
     print(f"Result: {result}")
     return result
+
+def get_client_relational_object(client_id):
+    """
+    Get relational client object
+    """
+    query = f"""
+    SELECT 
+        c.clientId,
+        c.clientName,
+        c.clientLicenseKey,
+        c.responseAPI,
+        c.lectureRouteUrl,
+        c.lectureRouteUrlServer,
+        c.isActive AS clientIsActive,
+        c.createdOn AS clientCreatedOn,
+        c.client_auth,
+        c.lectureDetailUrl,
+        r.relationId,
+        r.packageId,
+        r.activation_date,
+        r.isactive AS relationIsActive,
+        r.createOn AS relationCreatedOn,
+        r.currency
+    FROM 
+        rectureai.tbl_client c
+    LEFT JOIN 
+        rectureai.tbl_relation_client_package r 
+    ON 
+        c.clientId = r.clientId
+    WHERE 
+        c.clientId = {client_id};
+    """
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute(query)
+    result = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+    print(f"Result: {result}")
+    return result

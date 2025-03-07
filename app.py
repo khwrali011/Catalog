@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
-from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client
+from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client, get_client_relational_object
 
 app = Flask(__name__)
 
@@ -117,23 +117,27 @@ def get_client_info():
         return jsonify({"error": "Invalid encrypted data"}), 401
     
     try:
+        client_object = get_client_relational_object(client_id)
+        # return client_object
+
+    except Exception as e:
+        print(f"Error getting client info: {e}")
+        return jsonify({"error": "Client Retrieval Failed!"}), 401
+    
+    try:
         lecture_status = check_lecture_expiry(lecture_id)
         # print(f"Lecture Status: {lecture_status}")
         # return lecture_status
         lecture_status = str(lecture_status)
         if lecture_status == "1":
-            return jsonify({"Message": "Lecture has been expired!"}), 200
+            client_object["is_expired"] = "1"
+        else:
+            client_object["is_expired"] = "0"
+            return client_object, 200
     
     except Exception as e:
         print(f"Error Occured in checking lecture status: {e}")
         return jsonify({"error": "Lecture Validation Failed!"}), 401
-
-    try:
-        client = get_client(client_id)
-        return client
-    except Exception as e:
-        print(f"Error occured in getting client: {e}")
-        return jsonify({"error": "Client Retrieval Failed!"}), 401
 
 if __name__ == '__main__':
     app.run(debug=True)
