@@ -230,9 +230,9 @@ def get_client_relational_object(client_id):
         r.createOn AS relationCreatedOn,
         r.currency
     FROM 
-        rectureai.tbl_client c
+        tbl_client c
     LEFT JOIN 
-        rectureai.tbl_relation_client_package r 
+        tbl_relation_client_package r 
     ON 
         c.clientId = r.clientId
     WHERE 

@@ -133,7 +133,8 @@ def get_client_info():
             client_object["is_expired"] = "1"
         else:
             client_object["is_expired"] = "0"
-            return client_object, 200
+        
+        return client_object, 200
     
     except Exception as e:
         print(f"Error Occured in checking lecture status: {e}")
