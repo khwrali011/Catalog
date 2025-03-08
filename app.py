@@ -52,8 +52,12 @@ def start_lecture():
     
     try:
         lecture_status = insert_lecture(client_id, lecture_id)
+        # return lecture_status
         if lecture_status["message"] == "Lecture started successfully":
             pass
+        elif lecture_status["message"] == "Lecture has been recorded!":
+            print("ok")
+            return lecture_status, 200
         else:
             return lecture_status
     except Exception as e:
