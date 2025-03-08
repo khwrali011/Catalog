@@ -22,7 +22,7 @@ def start_lecture():
     if 'lectureId' not in data:
         return jsonify({"error": "Missing clientId or lectureId"}), 400
 
-    encrypted_client_id = request.headers.get('Authorization')
+    encrypted_client_id = data['key']
     lecture_id = data['lectureId']
 
     if not encrypted_client_id or not lecture_id:
