@@ -2,8 +2,7 @@ from flask import Flask, request, jsonify, redirect, url_for, render_template, s
 import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
-from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client, get_client_relational_object
-from helper_functions import validate_user
+from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client_relational_object, validate_user 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some secret key'

@@ -1,4 +1,0 @@
-ALTER TABLE tbl_client MODIFY responseAPI VARCHAR(255);
-ALTER TABLE tbl_client MODIFY lectureRouteUrl VARCHAR(255);
-UPDATE `tbl_client` SET `responseAPI` = 'https://rectureadmin.azurewebsites.net/api/Rest/', `lectureRouteUrl` = 'https://ec31-182-189-123-36.ngrok-free.app/api/record' WHERE (`clientId` = '1');
-

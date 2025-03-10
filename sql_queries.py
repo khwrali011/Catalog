@@ -44,6 +44,21 @@ def generate_decryption(input):
 
 # print(generate_decryption("B2O01IfDnTo8hiSSTUJSag=="))
 
+# Function to validate user credentials
+def validate_user(username, password):
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT password FROM credentials WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        # Check if user exists and password matches
+        if user and user["password"] == password:
+            return True
+    return False
+
 def authenticate_client(client_id):
     """
     Authenticate the client by checking if clientId exists and is active.
