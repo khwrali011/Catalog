@@ -1,10 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect, url_for, render_template, session
 import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client, get_client_relational_object
+from helper_functions import validate_user
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'some secret key'
 
 # Load encryption key from JSON
 App_Directory = os.path.dirname(__file__)
@@ -12,6 +14,33 @@ credentials_path = os.path.join(App_Directory, "credenials.json")
 
 with open(credentials_path, "r") as file:
     data = json.load(file)
+
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if validate_user(username, password):
+            session['logged_in'] = True
+            return redirect(url_for('dashboard'))
+        else:
+            return render_template('login.html', error="Invalid Credentials")
+
+    return render_template('login.html')
+
+@app.route('/dashboard')
+def dashboard():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('dashboard.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
+
+
 
 @app.route('/start_lecture', methods=['POST'])
 def start_lecture():
