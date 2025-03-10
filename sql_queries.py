@@ -44,6 +44,39 @@ def generate_decryption(input):
 
 # print(generate_decryption("B2O01IfDnTo8hiSSTUJSag=="))
 
+# Function to update ngrok URL for a specific client
+def update_ngrok_url(client_id, ngrok_url):
+    """
+    Update the lectureRouteUrl field for a specific client
+    """
+    # Check if the client exists
+    query_check = "SELECT COUNT(*) FROM tbl_client WHERE clientId = %s"
+    query_update = "UPDATE tbl_client SET lectureRouteUrl = %s WHERE clientId = %s"
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if client exists
+    cursor.execute(query_check, (client_id,))
+    count = cursor.fetchone()[0]
+    
+    if count == 0:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": f"Client ID {client_id} not found"}
+    
+    # Update the ngrok URL
+    try:
+        cursor.execute(query_update, (ngrok_url, client_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return {"status": "success", "message": "Ngrok URL updated successfully"}
+    except Exception as e:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": f"Error updating Ngrok URL: {str(e)}"}
+
 # Function to validate user credentials
 def validate_user(username, password):
     conn = get_db_connection()

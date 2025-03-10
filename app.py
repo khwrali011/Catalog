@@ -3,6 +3,7 @@ import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client_relational_object, validate_user 
+from sql_queries import update_ngrok_url
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some secret key'
@@ -39,6 +40,34 @@ def logout():
     session.pop('logged_in', None)
     return redirect(url_for('login'))
 
+@app.route('/update_ngrok', methods=['GET', 'POST'])
+def update_ngrok():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        client_id = request.form['client_id']
+        ngrok_url = request.form['ngrok_url']
+        
+        # Validate inputs
+        if not client_id or not ngrok_url:
+            return render_template('update_ngrok.html', error="Both Client ID and Ngrok URL are required")
+        
+        try:
+            # Attempt to convert client_id to integer
+            client_id = int(client_id)
+        except ValueError:
+            return render_template('update_ngrok.html', error="Client ID must be a number")
+        
+        # Update the URL in the database
+        result = update_ngrok_url(client_id, ngrok_url)
+        
+        if result.get('status') == 'success':
+            return render_template('update_ngrok.html', success=f"Ngrok URL updated successfully for client {client_id}")
+        else:
+            return render_template('update_ngrok.html', error=result.get('message', "Failed to update Ngrok URL"))
+    
+    return render_template('update_ngrok.html')
 
 
 @app.route('/start_lecture', methods=['POST'])
