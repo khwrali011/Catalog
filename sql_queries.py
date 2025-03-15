@@ -44,6 +44,49 @@ def generate_decryption(input):
 
 # print(generate_decryption("B2O01IfDnTo8hiSSTUJSag=="))
 
+def delete_lectures_by_client(client_id):
+    """
+    Delete all lectures associated with the given client ID.
+    """
+    query_check_client = "SELECT COUNT(*) FROM tbl_client WHERE clientId = %s"
+    query_check_lectures = "SELECT COUNT(*) FROM lectures WHERE client_id = %s"
+    query_delete = "DELETE FROM lectures WHERE client_id = %s"
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Check if client exists
+    cursor.execute(query_check_client, (client_id,))
+    client_exists = cursor.fetchone()[0]
+
+    if client_exists == 0:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": f"Client ID {client_id} does not exist."}
+
+    # Check if client has any lectures
+    cursor.execute(query_check_lectures, (client_id,))
+    lecture_count = cursor.fetchone()[0]
+
+    if lecture_count == 0:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": f"No lectures found for Client ID {client_id}."}
+
+    # Delete lectures
+    try:
+        cursor.execute(query_delete, (client_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return {"status": "success", "message": f"Deleted {lecture_count} lecture(s) for Client ID {client_id}."}
+    except Exception as e:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": str(e)}
+
+
+
 # Function to update ngrok URL for a specific client
 def update_ngrok_url(client_id, ngrok_url):
     """

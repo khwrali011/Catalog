@@ -3,7 +3,7 @@ import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client_relational_object, validate_user 
-from sql_queries import update_ngrok_url
+from sql_queries import update_ngrok_url, delete_lectures_by_client
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some secret key'
@@ -69,6 +69,31 @@ def update_ngrok():
     
     return render_template('update_ngrok.html')
 
+@app.route('/delete_lectures')
+def delete_lectures():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('delete_lectures.html')
+
+@app.route('/process_delete_lectures', methods=['POST'])
+def process_delete_lectures():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    client_id = request.form.get('client_id')
+
+    if not client_id.isdigit():
+        return render_template('delete_lectures.html', error="Client ID must be a number")
+
+    client_id = int(client_id)
+    
+    result = delete_lectures_by_client(client_id)
+
+    if result["status"] == "success":
+        return render_template('delete_lectures.html', success=result["message"])
+    else:
+        return render_template('delete_lectures.html', error=result["message"])
+    
 
 @app.route('/start_lecture', methods=['POST'])
 def start_lecture():
