@@ -3,7 +3,7 @@ import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client_relational_object, validate_user 
-from sql_queries import update_ngrok_url, delete_lectures_by_client, delete_specific_lecture_func
+from sql_queries import update_ngrok_url, delete_lectures_by_client, delete_specific_lecture_func, get_lectures_count
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some secret key'
@@ -289,9 +289,8 @@ def get_client_information():
         # Check if client is demoClient
         if client_object.get("isDemoClient") == 1:
 
-            ############################# Need to get from DB ###############################
-
-            lecture_count = 1
+            lecture_count = get_lectures_count(client_id)
+            # return str(lecture_count)
 
             demoLectures = client_object.get("demoLectures", 0)
             if lecture_count > demoLectures:

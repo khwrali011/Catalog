@@ -186,6 +186,23 @@ def authenticate_client(client_id):
     else:
         return {"status": "error", "message": "Client authentication failed or inactive"}
     
+def get_lectures_count(client_id):
+    """
+    Count How many lectures have been inserted for this client
+    """
+    query_check = f"SELECT COUNT(*) FROM lectures WHERE client_id = {client_id}"
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Check for existing lecture
+    cursor.execute(query_check)
+    count = cursor.fetchone()[0]
+    try:
+        return int(count)
+    except Exception as e:
+        print(f"Error in getting Lectures Count of this Client: {e}")
+        return 0
+
 def insert_lecture(client_id, lecture_id):
     """
     Insert a new lecture record into the lectures table.
