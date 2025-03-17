@@ -341,7 +341,8 @@ def get_client_relational_object(client_id):
     SELECT 
         c.clientId,
         c.clientName,
-        c.clientLicenseKey,
+        c.isDemoClient,
+        c.demoLectures,
         c.responseAPI,
         c.lectureRouteUrl,
         c.lectureRouteUrlServer,

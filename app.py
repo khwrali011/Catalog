@@ -250,6 +250,69 @@ def get_client_info():
     except Exception as e:
         print(f"Error Occured in checking lecture status: {e}")
         return jsonify({"error": "Lecture Validation Failed!"}), 401
+    
+@app.route('/get_client_information', methods=['POST'])
+def get_client_information():
+    try:
+        if not request.is_json:
+            return jsonify({"errorCode": "003", "message": "Request must be JSON"}), 400
+
+        data = request.get_json()
+
+        if 'lecture_Id' not in data or 'Authorization' not in request.headers:
+            return jsonify({"errorCode": "003", "message": "Missing clientId or lectureId"}), 400
+        
+        encrypted_client_id = request.headers.get('Authorization')
+        lecture_id = data.get('lecture_Id')
+
+        ############################# Need to get from DB ############################### 
+
+        if not encrypted_client_id or not lecture_id:
+            return jsonify({"errorCode": "003", "message": "Cannot record this lecture because portal has not started this"}), 400
+
+        # Decrypt client ID
+        try:
+            client_id = generate_decryption(encrypted_client_id)
+            # return client_id
+        except Exception:
+            return jsonify({"errorCode": "003", "message": "Invalid client ID"}), 401
+
+        # Get client object
+        try:
+            client_object = get_client_relational_object(client_id)
+            # return client_object
+            if not client_object:
+                return jsonify({"errorCode": "003", "message": "Client not found"}), 404
+        except Exception as e:
+            return jsonify({"errorCode": "003", "message": f"Error retrieving client: {str(e)}"}), 500
+
+        # Check if client is demoClient
+        if client_object.get("isDemoClient") == 1:
+
+            ############################# Need to get from DB ###############################
+
+            lecture_count = 1
+
+            demoLectures = client_object.get("demoLectures", 0)
+            if lecture_count > demoLectures:
+                return jsonify({"errorCode": "004", "message": "Lecture quota exceeded! Please contact vendor"}), 403
+        
+        # return client_object
+        
+        # Check if lecture is expired
+        try:
+            lecture_status = check_lecture_expiry(lecture_id)
+            if str(lecture_status) == "1":
+                return jsonify({"errorCode": "005", "message": "Lecture has been recorded!"}), 200
+        except Exception as e:
+            return jsonify({"errorCode": "003", "message": f"Error checking lecture expiry: {str(e)}"}), 500
+
+        # Success response
+        return jsonify({"errorCode": "001", "message": "Client is available!", "client": client_object}), 200
+
+    except Exception as e:
+        return jsonify({"errorCode": "003", "message": f"Unexpected error: {str(e)}"}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
