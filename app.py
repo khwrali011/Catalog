@@ -3,7 +3,7 @@ import json
 import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client_relational_object, validate_user 
-from sql_queries import update_ngrok_url, delete_lectures_by_client
+from sql_queries import update_ngrok_url, delete_lectures_by_client, delete_specific_lecture_func
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some secret key'
@@ -94,6 +94,31 @@ def process_delete_lectures():
     else:
         return render_template('delete_lectures.html', error=result["message"])
     
+@app.route('/delete_specific_lecture')
+def delete_specific_lecture():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('delete_specific_lecture.html')
+
+@app.route('/process_delete_specific_lecture', methods=['POST'])
+def process_delete_specific_lecture():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    client_id = request.form.get('client_id')
+    lecture_id = request.form.get('lecture_id')
+
+    if not client_id.isdigit() or not lecture_id.isdigit():
+        return render_template('delete_specific_lecture.html', error="Client ID and Lecture ID must be numbers.")
+
+    client_id, lecture_id = int(client_id), int(lecture_id)
+
+    result = delete_specific_lecture_func(client_id, lecture_id)
+
+    if result["status"] == "success":
+        return render_template('delete_specific_lecture.html', success=result["message"])
+    else:
+        return render_template('delete_specific_lecture.html', error=result["message"])
 
 @app.route('/start_lecture', methods=['POST'])
 def start_lecture():

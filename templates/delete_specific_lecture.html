@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Specific Lecture</title>
+    <style>
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: red;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success { background-color: #4CAF50; color: white; }
+        .error { background-color: #f44336; color: white; }
+    </style>
+</head>
+<body>
+    <h2>Delete Specific Lecture</h2>
+    {% if success %}<p class="message success">{{ success }}</p>{% endif %}
+    {% if error %}<p class="message error">{{ error }}</p>{% endif %}
+    
+    <form action="{{ url_for('process_delete_specific_lecture') }}" method="POST">
+        <label for="client_id">Client ID:</label>
+        <input type="number" name="client_id" required>
+        <br>
+        <label for="lecture_id">Lecture ID:</label>
+        <input type="number" name="lecture_id" required>
+        <br>
+        <button type="submit" class="btn">Delete</button>
+    </form>
+    <br>
+    <a href="{{ url_for('dashboard') }}" class="btn" style="background-color: gray;">Back to Dashboard</a>
+</body>
+</html>

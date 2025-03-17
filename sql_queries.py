@@ -84,8 +84,35 @@ def delete_lectures_by_client(client_id):
         cursor.close()
         conn.close()
         return {"status": "error", "message": str(e)}
+    
+def delete_specific_lecture_func(client_id, lecture_id):
+    """
+    Delete a specific lecture by client_id and lecture_id.
+    """
+    query_check = "SELECT COUNT(*) FROM lectures WHERE client_id = %s AND lecture_id = %s"
+    query_delete = "DELETE FROM lectures WHERE client_id = %s AND lecture_id = %s"
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
+    cursor.execute(query_check, (client_id, lecture_id))
+    lecture_exists = cursor.fetchone()[0]
+
+    if lecture_exists == 0:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": f"Lecture ID {lecture_id} for Client ID {client_id} not found."}
+
+    try:
+        cursor.execute(query_delete, (client_id, lecture_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return {"status": "success", "message": f"Lecture ID {lecture_id} deleted successfully for Client ID {client_id}."}
+    except Exception as e:
+        cursor.close()
+        conn.close()
+        return {"status": "error", "message": str(e)}
 
 # Function to update ngrok URL for a specific client
 def update_ngrok_url(client_id, ngrok_url):
