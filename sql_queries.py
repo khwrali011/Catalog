@@ -191,7 +191,7 @@ def insert_lecture(client_id, lecture_id):
     Insert a new lecture record into the lectures table.
     Ensures that duplicate lectures are not inserted.
     """
-    expire_check = f"SELECT is_expired FROM lectures WHERE lecture_id = {lecture_id}"
+    # expire_check = f"SELECT is_expired FROM lectures WHERE lecture_id = {lecture_id}"
     query_check = "SELECT COUNT(*) FROM lectures WHERE client_id = %s AND lecture_id = %s"
     query_insert = """
     INSERT INTO lectures (client_id, lecture_id, lecture_start_date) 
@@ -207,19 +207,19 @@ def insert_lecture(client_id, lecture_id):
 
     if count > 0:
 
-        # Check for existing lecture
-        cursor.execute(expire_check)
-        expired = cursor.fetchone()[0]
-        expired = str(expired)
-        print(f"Count: {expired}")
+        # # Check for existing lecture
+        # cursor.execute(expire_check)
+        # expired = cursor.fetchone()[0]
+        # expired = str(expired)
+        # print(f"Count: {expired}")
 
-        if expired == "1":
-            cursor.close()
-            conn.close()
-            return {"message": "Lecture has been recorded!"}
+        # if expired == "1":
+        #     cursor.close()
+        #     conn.close()
+        #     return {"message": "Lecture has been recorded!"}
         
-        cursor.close()
-        conn.close()
+        # cursor.close()
+        # conn.close()
         return {"message": "Lecture started successfully"}
 
     # Insert new lecture
