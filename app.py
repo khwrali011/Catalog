@@ -4,6 +4,7 @@ import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client_relational_object, validate_user 
 from sql_queries import update_ngrok_url, delete_lectures_by_client, delete_specific_lecture_func, get_lectures_count
+from sql_queries import get_lecture_start_status
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some secret key'
@@ -265,17 +266,16 @@ def get_client_information():
         encrypted_client_id = request.headers.get('Authorization')
         lecture_id = data.get('lecture_Id')
 
-        ############################# Need to get from DB ############################### 
-
-        if not encrypted_client_id or not lecture_id:
-            return jsonify({"errorCode": "003", "message": "Cannot record this lecture because portal has not started this"}), 400
-
         # Decrypt client ID
         try:
             client_id = generate_decryption(encrypted_client_id)
             # return client_id
         except Exception:
             return jsonify({"errorCode": "003", "message": "Invalid client ID"}), 401
+
+        status = get_lecture_start_status(client_id, lecture_id)
+        if not status:
+            return jsonify({"errorCode": "003", "message": "Cannot record this lecture because portal has not started this"}), 400
 
         # Get client object
         try:

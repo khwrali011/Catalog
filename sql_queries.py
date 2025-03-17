@@ -203,6 +203,26 @@ def get_lectures_count(client_id):
         print(f"Error in getting Lectures Count of this Client: {e}")
         return 0
 
+def get_lecture_start_status(client_id, lecture_id):
+    """
+    Checks either the lecture has been started by the portal
+    """
+    query_check = f"SELECT COUNT(*) FROM lectures WHERE client_id = {client_id} AND lecture_id = {lecture_id}"
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Check for existing lecture
+    cursor.execute(query_check)
+    count = cursor.fetchone()[0]
+    try:
+        if count == 0:
+            return False
+        else:
+            return True
+    except Exception as e:
+        print(f"Error in getting Lectures Count of this Client: {e}")
+        return True
+    
 def insert_lecture(client_id, lecture_id):
     """
     Insert a new lecture record into the lectures table.
