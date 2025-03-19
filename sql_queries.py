@@ -46,29 +46,48 @@ def generate_decryption(input):
 
 def insert_client(client_name):
     """
-    Inserts a new client into the database and returns the generated client ID.
+    Inserts a new client into the database, retrieves the client ID,
+    encrypts it, and updates the client_auth column.
     """
-    query = """
+    insert_query = """
     INSERT INTO `rectureai`.`tbl_client` 
     (`clientName`, `isActive`, `isDemoClient`, `demoLectures`, `createdOn`)
     VALUES (%s, 1, 1, 10, NOW());
     """
 
     get_id_query = "SELECT LAST_INSERT_ID() AS clientId;"
+    
+    update_query = """
+    UPDATE `rectureai`.`tbl_client`
+    SET `client_auth` = %s
+    WHERE `clientId` = %s;
+    """
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        cursor.execute(query, (client_name,))
+        # Insert new client
+        cursor.execute(insert_query, (client_name,))
         conn.commit()
+
+        # Get the generated client ID
         cursor.execute(get_id_query)
         client_id = cursor.fetchone()[0]
+
+        # Encrypt the client ID
+        encrypted_client_id = generate_encryption(str(client_id))  # Ensure it's a string before encryption
+
+        # Update the client_auth column
+        cursor.execute(update_query, (encrypted_client_id, client_id))
+        conn.commit()
+
         return client_id
+
     except Exception as e:
         conn.rollback()
-        print(f"Error inserting client: {e}")
-        return None
+        print(f"Error inserting client and encrypting ID: {e}")
+        return None, None
     finally:
         cursor.close()
         conn.close()
