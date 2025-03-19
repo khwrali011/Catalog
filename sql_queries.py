@@ -44,6 +44,35 @@ def generate_decryption(input):
 
 # print(generate_decryption("B2O01IfDnTo8hiSSTUJSag=="))
 
+def insert_client(client_name):
+    """
+    Inserts a new client into the database and returns the generated client ID.
+    """
+    query = """
+    INSERT INTO `rectureai`.`tbl_client` 
+    (`clientName`, `isActive`, `isDemoClient`, `demoLectures`, `createdOn`)
+    VALUES (%s, 1, 1, 10, NOW());
+    """
+
+    get_id_query = "SELECT LAST_INSERT_ID() AS clientId;"
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(query, (client_name,))
+        conn.commit()
+        cursor.execute(get_id_query)
+        client_id = cursor.fetchone()[0]
+        return client_id
+    except Exception as e:
+        conn.rollback()
+        print(f"Error inserting client: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
 def delete_lectures_by_client(client_id):
     """
     Delete all lectures associated with the given client ID.

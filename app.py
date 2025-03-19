@@ -4,7 +4,7 @@ import os
 from sql_queries import authenticate_client, insert_lecture, get_client_lecture_details, generate_decryption
 from sql_queries import mark_lecture_expired, check_lecture_expiry, get_client_relational_object, validate_user 
 from sql_queries import update_ngrok_url, delete_lectures_by_client, delete_specific_lecture_func, get_lectures_count
-from sql_queries import get_lecture_start_status
+from sql_queries import get_lecture_start_status, insert_client  # Import function from sql_queries.py
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some secret key'
@@ -40,6 +40,29 @@ def dashboard():
 def logout():
     session.pop('logged_in', None)
     return redirect(url_for('login'))
+
+@app.route('/add_client', methods=['GET', 'POST'])
+def add_client():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        client_name = request.form.get('client_name')
+
+        if not client_name:
+            return render_template('add_client.html', error="Client name is required.")
+
+        try:
+            client_id = insert_client(client_name)  # Function to insert client into DB
+            if client_id:
+                return render_template('add_client.html', success=f"Client created successfully with ID: {client_id}")
+            else:
+                return render_template('add_client.html', error="Failed to create client.")
+        except Exception as e:
+            return render_template('add_client.html', error=f"Error: {str(e)}")
+
+    return render_template('add_client.html')
+
 
 @app.route('/update_ngrok', methods=['GET', 'POST'])
 def update_ngrok():
