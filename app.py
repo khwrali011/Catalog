@@ -45,9 +45,12 @@ def logout():
 def add_client():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    
+
     if request.method == 'POST':
         client_name = request.form.get('client_name')
+        number = request.form.get('number') or None
+        email = request.form.get('email') or None
+        address = request.form.get('address') or None
 
         if not client_name:
             return render_template('add_client.html', error="Client name is required.")
@@ -56,41 +59,18 @@ def add_client():
             client_id = insert_client(client_name)  # Insert client into DB
             if client_id:
                 session['client_id'] = client_id  # Store client ID in session
+
+                # Insert contact details in the same step
+                insert_client_contact_info(client_id, number, email, address)
+
                 return render_template('add_client.html', 
-                                       success=f"Client created successfully with ID: {client_id}", 
-                                       show_contact_form=True)
+                                       success=f"Client created successfully with ID: {client_id} and contact info added.")
             else:
                 return render_template('add_client.html', error="Failed to create client.")
         except Exception as e:
             return render_template('add_client.html', error=f"Error: {str(e)}")
 
     return render_template('add_client.html')
-
-@app.route('/add_client_contact', methods=['POST'])
-def add_client_contact():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-
-    client_id = session.get('client_id')
-    if not client_id:
-        return redirect(url_for('add_client'))
-
-    number = request.form.get('number') or None
-    email = request.form.get('email') or None
-    address = request.form.get('address') or None
-
-    # Ensure at least one field is provided
-    if not (number or email or address):
-        return render_template('add_client.html', error="At least one field is required.", show_contact_form=True)
-
-    try:
-        success = insert_client_contact_info(client_id, number, email, address)
-        if success:
-            return render_template('add_client.html', success="Contact info added successfully!", show_contact_form=False)
-        else:
-            return render_template('add_client.html', error="Failed to add contact info.", show_contact_form=True)
-    except Exception as e:
-        return render_template('add_client.html', error=f"Error: {str(e)}", show_contact_form=True)
 
 @app.route('/update_ngrok', methods=['GET', 'POST'])
 def update_ngrok():
