@@ -42,7 +42,30 @@ def generate_decryption(input):
     decrypted_input = unpad(cipher.decrypt(base64.b64decode(input)).decode())
     return decrypted_input
 
-# print(generate_decryption("B2O01IfDnTo8hiSSTUJSag=="))
+def insert_client_contact_info(client_id, number, email, address):
+    """
+    Inserts client contact information into the database.
+    Allows NULL values for optional fields.
+    """
+    query = """
+    INSERT INTO rectureai.tbl_client_contact_info (clientId, Number, Email, Address) 
+    VALUES (%s, %s, %s, %s);
+    """
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(query, (client_id, number, email, address))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error inserting client contact info: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
 
 def insert_client(client_name):
     """

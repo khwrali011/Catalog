@@ -13,11 +13,29 @@
     {% if success %}
         <p style="color: green;">{{ success }}</p>
     {% endif %}
+    
     <form method="POST">
         <label for="client_name">Client Name:</label>
         <input type="text" id="client_name" name="client_name" required>
         <button type="submit">Create Client</button>
     </form>
+
+    {% if show_contact_form %}
+    <h2>Add Contact Details</h2>
+    <form method="POST" action="{{ url_for('add_client_contact') }}">
+        <label for="number">Phone Number (optional):</label>
+        <input type="text" id="number" name="number">
+        <br>
+        <label for="email">Email (optional):</label>
+        <input type="email" id="email" name="email">
+        <br>
+        <label for="address">Address (optional):</label>
+        <input type="text" id="address" name="address">
+        <br>
+        <button type="submit">Save Contact Info</button>
+    </form>
+    {% endif %}
+
     <br>
     <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 </body>
