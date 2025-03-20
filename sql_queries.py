@@ -48,7 +48,7 @@ def insert_client_contact_info(client_id, number, email, address):
     Allows NULL values for optional fields.
     """
     query = """
-    INSERT INTO rectureai.tbl_client_contact_info (clientId, Number, Email, Address) 
+    INSERT INTO tbl_client_contact_info (clientId, Number, Email, Address) 
     VALUES (%s, %s, %s, %s);
     """
 
@@ -73,7 +73,7 @@ def insert_client(client_name):
     encrypts it, and updates the client_auth column.
     """
     insert_query = """
-    INSERT INTO `rectureai`.`tbl_client` 
+    INSERT INTO `tbl_client` 
     (`clientName`, `isActive`, `isDemoClient`, `demoLectures`, `createdOn`)
     VALUES (%s, 1, 1, 10, NOW());
     """
@@ -81,7 +81,7 @@ def insert_client(client_name):
     get_id_query = "SELECT LAST_INSERT_ID() AS clientId;"
     
     update_query = """
-    UPDATE `rectureai`.`tbl_client`
+    UPDATE `tbl_client`
     SET `client_auth` = %s
     WHERE `clientId` = %s;
     """
