@@ -3,21 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - Admin Panel</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-light: #64B5F6;
+            --primary-dark: #1976D2;
+            --surface-color: #ffffff;
+            --background-color: #F3F4F6;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --border-color: #E5E7EB;
+            --error-color: #DC2626;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 400px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            height: 60px;
+            width: 160px;
+        }
+
+        .form-title {
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group .material-icons {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 12px 12px 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: var(--primary-dark);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .login-button:active {
+            transform: translateY(1px);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 12px;
+        }
+
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 280px) {
+            .login-card {
+                padding: 2px;
+            }
+
+            .logo {
+                height: 80px;
+                width: 180px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Login Page</h2>
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    <form method="POST">
-        <label>Username:</label>
-        <input type="text" name="username" required>
-        <br><br>
-        <label>Password:</label>
-        <input type="password" name="password" required>
-        <br><br>
-        <button type="submit">Login</button>
-    </form>
+    <div class="login-card">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo_round.png') }}" alt="Company Logo" class="logo">
+        </div>
+        <h1 class="form-title">Welcome Back</h1>
+        <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <span class="material-icons">person</span>
+                <input 
+                    type="text" 
+                    name="username"
+                    class="form-input" 
+                    placeholder="Username"
+                    required
+                >
+            </div>
+            <div class="form-group">
+                <span class="material-icons">lock</span>
+                <input 
+                    type="password" 
+                    name="password"
+                    class="form-input" 
+                    placeholder="Password"
+                    required
+                >
+            </div>
+            {% if error %}
+            <div style="color: var(--error-color); margin-bottom: 16px; text-align: center;">
+                {{ error }}
+            </div>
+            {% endif %}
+            <button type="submit" class="login-button">Log In</button>
+            <div class="forgot-password">
+                <a href="#">Forgot password?</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Remove the old event listener since we're using server-side form submission now
+    </script>
 </body>
 </html>
