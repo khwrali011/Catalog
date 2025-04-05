@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Add Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-light: #64B5F6;
+            --primary-dark: #1976D2;
+            --surface-color: #ffffff;
+            --background-color: #F3F4F6;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --border-color: #E5E7EB;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --info-color: #3B82F6;
+            --nav-width: 250px;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Side Navigation */
+        .sidenav {
+            width: var(--nav-width);
+            background-color: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo-container {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .nav-item .material-icons {
+            margin-right: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--nav-width);
+            padding: 32px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+
+        .stat-icon.clients {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .stat-icon.packages {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .stat-icon.lectures {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--info-color);
+        }
+
+        .stat-title {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-change {
+            font-size: 14px;
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .chart-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .chart-header {
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .chart-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Client List */
+        .client-list {
+            margin-top: 24px;
+        }
+
+        .client-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .client-item:last-child {
+            border-bottom: none;
+        }
+
+        .client-info {
+            flex: 1;
+        }
+
+        .client-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .client-lectures {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidenav {
+                width: 64px;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 64px;
+            }
+
+            .logo-container {
+                padding: 0 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Side Navigation -->
+    <nav class="sidenav">
+        <div class="logo-container">
+            <img src="logo_round.png" alt="Logo" class="logo">
+        </div>
+        <a href="dashboard.html" class="nav-item active">
+            <span class="material-icons">dashboard</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="clients.html" class="nav-item">
+            <span class="material-icons">business</span>
+            <span>Clients</span>
+        </a>
+        <a href="packages.html" class="nav-item">
+            <span class="material-icons">inventory_2</span>
+            <span>Packages</span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">settings</span>
+            <span>Settings</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Overview of your system's performance</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon clients">
+                        <span class="material-icons">groups</span>
+                    </div>
+                    <div class="stat-title">Total Clients</div>
+                </div>
+                <div class="stat-value">128</div>
+                <div class="stat-change">
+                    <span class="material-icons">trending_up</span>
+                    12% this month
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon packages">
+                        <span class="material-icons">inventory_2</span>
+                    </div>
+                    <div class="stat-title">Active Packages</div>
+                </div>
+                <div class="stat-value">45</div>
+                <div class="stat-change">
+                    <span class="material-icons">trending_up</span>
+                    8% this month
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon lectures">
+                        <span class="material-icons">school</span>
+                    </div>
+                    <div class="stat-title">Total Lectures</div>
+                </div>
+                <div class="stat-value">1,284</div>
+                <div class="stat-change">
+                    <span class="material-icons">trending_up</span>
+                    15% this month
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Lecture Recordings</h2>
+                    <p class="chart-subtitle">Last 7 days recording statistics</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="recordingsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Top Clients</h2>
+                    <p class="chart-subtitle">By number of lectures</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="clientsChart"></canvas>
+                </div>
+                <div class="client-list">
+                    <div class="client-item">
+                        <div class="client-info">
+                            <div class="client-name">Acme Corporation</div>
+                            <div class="client-lectures">245 lectures</div>
+                        </div>
+                    </div>
+                    <div class="client-item">
+                        <div class="client-info">
+                            <div class="client-name">Tech Solutions Ltd</div>
+                            <div class="client-lectures">198 lectures</div>
+                        </div>
+                    </div>
+                    <div class="client-item">
+                        <div class="client-info">
+                            <div class="client-name">Global Industries</div>
+                            <div class="client-lectures">156 lectures</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Line Chart for Recordings
+            const recordingsCtx = document.getElementById('recordingsChart').getContext('2d');
+            new Chart(recordingsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Recordings',
+                        data: [80, 49, 20, 100, 56, 5, 40],
+                        fill: true,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Doughnut Chart for Clients
+            const clientsCtx = document.getElementById('clientsChart').getContext('2d');
+            new Chart(clientsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acme Corp', 'Tech Solutions', 'Global Industries', 'Others'],
+                    datasets: [{
+                        data: [245, 198, 156, 685],
+                        backgroundColor: [
+                            '#10B981',
+                            '#F59E0B',
+                            '#3B82F6',
+                            '#E5E7EB'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        });
+    </script>
+</body>
+</html>

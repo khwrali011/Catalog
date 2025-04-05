@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client List</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-light: #64B5F6;
+            --primary-dark: #1976D2;
+            --surface-color: #ffffff;
+            --background-color: #F3F4F6;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --border-color: #E5E7EB;
+            --nav-width: 250px;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Side Navigation */
+        .sidenav {
+            width: var(--nav-width);
+            background-color: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-container {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            height: 60px;
+            width: 160px;
+        }
+
+        .nav-links {
+            padding: 20px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .nav-item .material-icons {
+            margin-right: 12px;
+        }
+
+        .settings-menu {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .settings-trigger {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .settings-trigger .arrow {
+            margin-left: auto;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .settings-menu.active .arrow {
+            transform: rotate(180deg);
+        }
+
+        .settings-dropdown {
+            display: none;
+            background-color: var(--surface-color);
+            border-radius: 4px;
+            margin: 0 8px;
+            overflow: hidden;
+        }
+
+        .settings-menu.active .settings-dropdown {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item .material-icons {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 4px 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--nav-width);
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .add-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-button:hover {
+            background-color: var(--primary-dark);
+            box-shadow: var(--hover-shadow);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Actions Menu */
+        .actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 8px 16px;
+        }
+
+        .action-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .action-button:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .action-button .material-icons {
+            font-size: 20px;
+        }
+
+        /* Add tooltips */
+        .action-button {
+            position: relative;
+        }
+
+        .action-button:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 12px;
+            border-radius: 4px;
+            white-space: nowrap;
+            margin-bottom: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidenav {
+                width: 64px;
+            }
+
+            .nav-item span:not(.material-icons) {
+                display: none;
+            }
+
+            .settings-trigger .arrow {
+                display: none;
+            }
+
+            .settings-dropdown {
+                position: absolute;
+                left: 100%;
+                top: 0;
+                margin: 0;
+                box-shadow: var(--card-shadow);
+                border: 1px solid var(--border-color);
+                min-width: 200px;
+            }
+
+            .dropdown-item span:not(.material-icons) {
+                display: inline;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+
+        /* Add hover effect for table rows */
+        table tbody tr:hover {
+            background-color: var(--background-color);
+        }
+
+        /* Style for sign out button */
+        .nav-item.signout {
+            border-top: 1px solid var(--border-color);
+            color: #DC2626; /* Red color for sign out */
+            margin-top: auto;
+            padding: 16px 20px;
+        }
+
+        .nav-item.signout:hover {
+            background-color: #FEE2E2; /* Light red background on hover */
+        }
+
+        /* Add these styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        .delete-button {
+            background-color: #DC2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #B91C1C;
+        }
+
+        .cancel-button {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cancel-button:hover {
+            background-color: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Side Navigation -->
+    <nav class="sidenav">
+        <div class="logo-container">
+            <img src="logo_round.png" alt="Logo" class="logo">
+        </div>
+        
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-item">
+                <span class="material-icons">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="clients.html" class="nav-item">
+                <span class="material-icons">people</span>
+                <span>Clients</span>
+            </a>
+            
+            <a href="packages.html" class="nav-item">
+                <span class="material-icons">inventory_2</span>
+                <span>Packages</span>
+            </a>
+            
+            <a href="settings.html" class="nav-item">
+                <span class="material-icons">settings</span>
+                <span>Settings</span>
+            </a>
+        </div>
+
+        <!-- Sign out at bottom -->
+        <a href="#" class="nav-item signout" onclick="handleSignOut()">
+            <span class="material-icons">logout</span>
+            <span>Sign Out</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Clients</h1>
+            <button class="add-button" onclick="location.href='createclient.html'">
+                <span class="material-icons">add</span>
+                Add Client
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Client Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Address</th>
+                        <th>Contact Person</th>
+                        <th>Contact Person Phone</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-client-id="1">
+                        <td>Acme Corporation</td>
+                        <td>contact@acme.com</td>
+                        <td>123-456-7890</td>
+                        <td>123 Business Ave, Suite 100</td>
+                        <td>John Doe</td>
+                        <td>098-765-4321</td>
+                        <td class="actions">
+                            <button class="action-button" onclick="editClient(this)" title="Edit">
+                                <span class="material-icons">edit</span>
+                            </button>
+                            <button class="action-button" onclick="deleteClient(this)" title="Delete">
+                                <span class="material-icons">delete</span>
+                            </button>
+                            <button class="action-button" onclick="showImageSettings(this)" title="Image Settings">
+                                <span class="material-icons">analytics</span>
+                            </button>
+                            <button class="action-button" onclick="showLectures(this)" title="Lectures">
+                                <span class="material-icons">school</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Add this at the end of your body tag -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete client "<span id="clientNameToDelete"></span>"?</p>
+            <div class="modal-actions">
+                <button class="cancel-button" onclick="closeDeleteModal()">Cancel</button>
+                <button class="delete-button" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Close any open menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const menus = document.querySelectorAll('.dropdown-menu');
+            menus.forEach(menu => {
+                if (!menu.parentElement.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            });
+        });
+
+        function toggleMenu(button) {
+            event.stopPropagation();
+            
+            // Close all other open menus
+            const allMenus = document.querySelectorAll('.dropdown-menu');
+            allMenus.forEach(menu => {
+                if (menu !== button.nextElementSibling) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            // Toggle the clicked menu
+            const menu = button.nextElementSibling;
+            menu.classList.toggle('show');
+
+            // Position the menu
+            if (menu.classList.contains('show')) {
+                const buttonRect = button.getBoundingClientRect();
+                const menuRect = menu.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+
+                // Check if menu would go off the bottom of the screen
+                if (buttonRect.bottom + menuRect.height > viewportHeight) {
+                    menu.style.top = 'auto';
+                    menu.style.bottom = '100%';
+                } else {
+                    menu.style.top = '100%';
+                    menu.style.bottom = 'auto';
+                }
+
+                // Check if menu would go off the right of the screen
+                if (buttonRect.right + menuRect.width > window.innerWidth) {
+                    menu.style.right = '0';
+                    menu.style.left = 'auto';
+                } else {
+                    menu.style.left = '0';
+                    menu.style.right = 'auto';
+                }
+            }
+        }
+
+        // Update the edit function to navigate to editclient.html
+        function editClient(button) {
+            const row = button.closest('tr');
+            const clientId = row.dataset.clientId;
+            window.location.href = `editclient.html?id=${clientId}`;
+        }
+
+        let rowToDelete = null;
+
+        function deleteClient(button) {
+            const row = button.closest('tr');
+            const clientName = row.cells[0].textContent;
+            
+            // Store the row for later deletion
+            rowToDelete = row;
+            
+            // Update and show the modal
+            document.getElementById('clientNameToDelete').textContent = clientName;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            rowToDelete = null;
+        }
+
+        function confirmDelete() {
+            if (rowToDelete) {
+                const clientName = rowToDelete.cells[0].textContent;
+                console.log('Deleting client:', clientName);
+                // Add your delete API call here
+                // After successful deletion:
+                rowToDelete.remove();
+            }
+            closeDeleteModal();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+
+        // Add new function for stats
+        function showImageSettings(button) {
+            const row = button.closest('tr');
+            const clientId = row.dataset.clientId;
+            window.location.href = `client_image_settings.html?id=${clientId}`;
+        }
+
+        function showLectures(button) {
+            const row = button.closest('tr');
+            const clientId = row.dataset.clientId; // Make sure to add this attribute to your tr elements
+            window.location.href = `client_lectures.html?id=${clientId}`;
+        }
+
+        // Update the table row click handler
+        function addRowClickHandlers() {
+            const rows = document.querySelectorAll('table tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    // Don't navigate if clicking on action buttons
+                    if (e.target.closest('.actions')) {
+                        return;
+                    }
+                    const clientId = this.dataset.clientId; // Add data-client-id to your tr elements
+                    window.location.href = `clientsettings.html?id=${clientId}`;
+                });
+                
+                // Add cursor pointer to show it's clickable
+                row.style.cursor = 'pointer';
+            });
+        }
+
+        // Call this after loading your table data
+        addRowClickHandlers();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsMenu = document.querySelector('.settings-menu');
+            
+            settingsMenu.addEventListener('click', function(e) {
+                this.classList.toggle('active');
+                e.stopPropagation();
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function() {
+                settingsMenu.classList.remove('active');
+            });
+        });
+
+        function handleSignOut() {
+            // Add your sign out logic here
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

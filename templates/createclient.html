@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Client</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-light: #64B5F6;
+            --primary-dark: #1976D2;
+            --surface-color: #ffffff;
+            --background-color: #F3F4F6;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --border-color: #E5E7EB;
+            --error-color: #DC2626;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .client-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 600px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .form-title {
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-group .material-icons {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 12px 12px 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+            padding-top: 16px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .submit-button, .cancel-button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .submit-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .submit-button:hover {
+            background-color: var(--primary-dark);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .cancel-button {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .cancel-button:hover {
+            background-color: var(--background-color);
+            box-shadow: var(--hover-shadow);
+        }
+
+        @media (max-width: 480px) {
+            .client-card {
+                padding: 24px;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-input.error {
+            border-color: var(--error-color);
+            background-color: #FEF2F2;
+        }
+
+        /* Add these styles for sections and improved form layout */
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Add styles for switch containers */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            margin-right: 12px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .switch-label {
+            font-size: 14px;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        /* Update textarea styles */
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="client-card">
+        <div class="header">
+            <h1 class="form-title">Add New Client</h1>
+            <p class="form-subtitle">Enter client details to create a new account</p>
+        </div>
+        <form id="clientForm" novalidate>
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <h2 class="section-title">Basic Information</h2>
+                <div class="form-group">
+                    <span class="material-icons">business</span>
+                    <input 
+                        type="text" 
+                        id="clientName"
+                        class="form-input" 
+                        placeholder="Client Name"
+                        required
+                    >
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">email</span>
+                    <input 
+                        type="email" 
+                        id="clientEmail"
+                        class="form-input" 
+                        placeholder="Client Email"
+                        required
+                    >
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">phone</span>
+                    <input 
+                        type="tel" 
+                        id="clientContact"
+                        class="form-input" 
+                        placeholder="Client Contact"
+                        pattern="[0-9]*"
+                        required
+                    >
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">location_on</span>
+                    <textarea 
+                        id="clientAddress"
+                        class="form-input" 
+                        placeholder="Client Address"
+                        required
+                    ></textarea>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+
+            <!-- Contact Person Section -->
+            <div class="form-section">
+                <h2 class="section-title">Contact Person Details</h2>
+                <div class="form-group">
+                    <span class="material-icons">person</span>
+                    <input 
+                        type="text" 
+                        id="contactPerson"
+                        class="form-input" 
+                        placeholder="Contact Person Name"
+                        required
+                    >
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">phone</span>
+                    <input 
+                        type="tel" 
+                        id="contactPersonPhone"
+                        class="form-input" 
+                        placeholder="Contact Person Phone"
+                        pattern="[0-9]*"
+                        required
+                    >
+                    <div class="error-message"></div>
+                </div>
+            </div>
+
+            <!-- Additional Settings Section -->
+            <div class="form-section">
+                <h2 class="section-title">Additional Settings</h2>
+                <div class="form-group">
+                    <span class="material-icons">link</span>
+                    <input 
+                        type="url" 
+                        id="routeUrl"
+                        class="form-input" 
+                        placeholder="Route URL"
+                        required
+                    >
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <span class="material-icons">api</span>
+                    <input 
+                        type="text" 
+                        id="responseApi"
+                        class="form-input" 
+                        placeholder="Response API"
+                        required
+                    >
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="clientStatus" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="switch-label">Enable Client</span>
+                </div>
+
+                <div class="switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="isDemo" onchange="toggleLectureCount()">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="switch-label">Demo Client</span>
+                </div>
+
+                <div class="form-group" id="lectureCountGroup" style="display: none;">
+                    <span class="material-icons">school</span>
+                    <input 
+                        type="number" 
+                        id="lectureCount"
+                        class="form-input" 
+                        placeholder="Number of Lectures"
+                        min="1"
+                    >
+                    <div class="error-message"></div>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button type="button" class="cancel-button" onclick="history.back()">Cancel</button>
+                <button type="submit" class="submit-button">Add Client</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('clientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateForm()) {
+                const formData = {
+                    clientName: document.getElementById('clientName').value,
+                    clientEmail: document.getElementById('clientEmail').value,
+                    clientContact: document.getElementById('clientContact').value,
+                    clientAddress: document.getElementById('clientAddress').value,
+                    contactPerson: document.getElementById('contactPerson').value,
+                    contactPersonPhone: document.getElementById('contactPersonPhone').value,
+                    routeUrl: document.getElementById('routeUrl').value,
+                    lectureCount: document.getElementById('lectureCount').value,
+                    responseApi: document.getElementById('responseApi').value,
+                    isEnabled: document.getElementById('clientStatus').checked,
+                    isDemo: document.getElementById('isDemo').checked
+                };
+
+                console.log('Form data:', formData);
+                // Add your API call here
+            }
+        });
+
+        function validateForm() {
+            let isValid = true;
+            
+            // Basic Information validation
+            isValid = validateField('clientName', /^.{3,}$/, 'Name must be at least 3 characters') && isValid;
+            isValid = validateField('clientEmail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Invalid email address') && isValid;
+            isValid = validateField('clientContact', /^\d{10,}$/, 'Invalid phone number') && isValid;
+            isValid = validateField('clientAddress', /.{10,}/, 'Address must be at least 10 characters') && isValid;
+            
+            // Contact Person validation
+            isValid = validateField('contactPerson', /^.{3,}$/, 'Name must be at least 3 characters') && isValid;
+            isValid = validateField('contactPersonPhone', /^\d{10,}$/, 'Invalid phone number') && isValid;
+            
+            // Additional Settings validation
+            isValid = validateField('routeUrl', /^https?:\/\/.+/, 'Invalid URL format') && isValid;
+            isValid = validateField('responseApi', /^.{3,}$/, 'API endpoint required') && isValid;
+
+            // Only validate lecture count if demo mode is enabled
+            if (document.getElementById('isDemo').checked) {
+                isValid = validateField('lectureCount', /^\d+$/, 'Must be a positive number') && isValid;
+            }
+
+            return isValid;
+        }
+
+        function validateField(fieldId, pattern, errorMessage) {
+            const field = document.getElementById(fieldId);
+            const value = field.value.trim();
+            const errorElement = field.nextElementSibling;
+            
+            if (!pattern.test(value)) {
+                field.classList.add('error');
+                errorElement.style.display = 'block';
+                errorElement.textContent = errorMessage;
+                return false;
+            }
+            
+            field.classList.remove('error');
+            errorElement.style.display = 'none';
+            return true;
+        }
+
+        // Add real-time validation
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.classList.contains('error')) {
+                    validateField(this.id, this.pattern || /.+/, 'Invalid input');
+                }
+            });
+        });
+
+        // Prevent non-numeric input for phone numbers
+        document.querySelectorAll('input[type="tel"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            input.addEventListener('keypress', function(e) {
+                if (!/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        function toggleLectureCount() {
+            const demoToggle = document.getElementById('isDemo');
+            const lectureCountGroup = document.getElementById('lectureCountGroup');
+            const lectureCountInput = document.getElementById('lectureCount');
+            
+            if (demoToggle.checked) {
+                lectureCountGroup.style.display = 'block';
+                lectureCountInput.required = true;
+            } else {
+                lectureCountGroup.style.display = 'none';
+                lectureCountInput.required = false;
+                lectureCountInput.value = ''; // Clear the value when hidden
+            }
+        }
+
+        // Initialize the lecture count visibility on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleLectureCount();
+        });
+    </script>
+</body>
+</html>

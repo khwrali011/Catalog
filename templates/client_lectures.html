@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Lectures</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-light: #64B5F6;
+            --primary-dark: #1976D2;
+            --surface-color: #ffffff;
+            --background-color: #F3F4F6;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --border-color: #E5E7EB;
+            --nav-width: 250px;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Include the sidenav styles from clients.html */
+        .sidenav {
+            width: var(--nav-width);
+            background-color: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--nav-width);
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--border-color);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-title {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-value.money {
+            color: #10B981;
+        }
+
+        /* Filter Container */
+        .filter-container {
+            background: var(--surface-color);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .date-input {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .filter-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-button:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--hover-shadow);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-badge.active {
+            background-color: #DEF7EC;
+            color: #059669;
+        }
+
+        .status-badge.ended {
+            background-color: #FEE2E2;
+            color: #DC2626;
+        }
+
+        @media (max-width: 1024px) {
+            .sidenav {
+                width: 64px;
+            }
+
+            .main-content {
+                margin-left: 64px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+
+        /* Add these styles */
+        .tabs-container {
+            margin-bottom: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2px;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            color: var(--primary-color);
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .action-button:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .action-button[title="Delete"]:hover {
+            color: #DC2626;
+            background-color: #FEE2E2;
+        }
+
+        .action-button[title="Enable"]:hover {
+            color: #059669;
+            background-color: #DEF7EC;
+        }
+
+        .action-button[title="Disable"]:hover {
+            color: #DC2626;
+            background-color: #FEE2E2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Include your navigation from clients.html -->
+    <nav class="sidenav">
+        <!-- Copy the navigation content from clients.html -->
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <button class="back-button" onclick="history.back()">
+                <span class="material-icons">arrow_back</span>
+            </button>
+            <h1>Lectures - <span id="clientName">Client Name</span></h1>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-title">Total Lectures</div>
+                <div class="stat-value">156</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Active Lectures</div>
+                <div class="stat-value">23</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Revenue</div>
+                <div class="stat-value money">$7,800</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Lectures This Month</div>
+                <div class="stat-value">12</div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('completed')">
+                    <span class="material-icons">check_circle</span>
+                    Completed Lectures
+                </button>
+                <button class="tab-button" onclick="switchTab('pending')">
+                    <span class="material-icons">pending</span>
+                    Pending Lectures
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-container">
+            <input type="date" class="date-input" id="startDate" placeholder="Start Date">
+            <input type="date" class="date-input" id="endDate" placeholder="End Date">
+            <button class="filter-button" onclick="applyFilter()">
+                <span class="material-icons">filter_alt</span>
+                Apply Filter
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Lecture ID</th>
+                        <th>Topic</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th style="width: 120px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="lecturesTableBody">
+                    <!-- Example of a completed lecture -->
+                    <tr>
+                        <td>LEC001</td>
+                        <td>Introduction to AI</td>
+                        <td>2024-02-01 09:00</td>
+                        <td>2024-02-01 10:30</td>
+                        <td>
+                            <span class="status-badge ended">
+                                <span class="material-icons" style="font-size: 16px;">check_circle</span>
+                                Ended
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <button class="action-button" onclick="deleteLecture(this)" title="Delete">
+                                <span class="material-icons">delete</span>
+                            </button>
+                            <button class="action-button" onclick="toggleLecture(this)" title="Disable">
+                                <span class="material-icons">block</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <!-- Example of a pending lecture -->
+                    <tr>
+                        <td>LEC002</td>
+                        <td>Machine Learning Basics</td>
+                        <td>2024-02-15 14:00</td>
+                        <td>-</td>
+                        <td>
+                            <span class="status-badge active">
+                                <span class="material-icons" style="font-size: 16px;">schedule</span>
+                                Pending
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <button class="action-button" onclick="deleteLecture(this)" title="Delete">
+                                <span class="material-icons">delete</span>
+                            </button>
+                            <button class="action-button" onclick="toggleLecture(this)" title="Enable">
+                                <span class="material-icons">check_circle</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Add this function to clients.html
+        function showLectures(button) {
+            const row = button.closest('tr');
+            const clientId = row.dataset.clientId;
+            window.location.href = `client_lectures.html?id=${clientId}`;
+        }
+
+        // Functions for client_lectures.html
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get client ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const clientId = urlParams.get('id');
+            
+            if (clientId) {
+                loadClientLectures(clientId);
+            } else {
+                window.location.href = 'clients.html';
+            }
+        });
+
+        function loadClientLectures(clientId) {
+            // Load client info
+            document.getElementById('clientName').textContent = `Client ${clientId}`;
+            
+            // Load stats
+            // Add your API calls here
+            
+            // Load initial lectures (completed)
+            loadLectures('completed');
+        }
+
+        function applyFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            // Add your filter logic here
+            console.log('Filtering lectures:', { startDate, endDate });
+        }
+
+        function switchTab(tab) {
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            loadLectures(tab);
+        }
+
+        function loadLectures(status) {
+            const tableBody = document.getElementById('lecturesTableBody');
+            // Example data - replace with your API call
+            const lectures = {
+                completed: [
+                    {
+                        id: 'LEC001',
+                        topic: 'Introduction to AI',
+                        startDate: '2024-02-01 09:00',
+                        endDate: '2024-02-01 10:30',
+                        status: 'ended'
+                    }
+                ],
+                pending: [
+                    {
+                        id: 'LEC002',
+                        topic: 'Machine Learning Basics',
+                        startDate: '2024-02-15 14:00',
+                        endDate: '-',
+                        status: 'pending'
+                    }
+                ]
+            };
+
+            const currentLectures = lectures[status] || [];
+            
+            tableBody.innerHTML = currentLectures.map(lecture => `
+                <tr>
+                    <td>${lecture.id}</td>
+                    <td>${lecture.topic}</td>
+                    <td>${lecture.startDate}</td>
+                    <td>${lecture.endDate}</td>
+                    <td>
+                        <span class="status-badge ${lecture.status === 'ended' ? 'ended' : 'active'}">
+                            <span class="material-icons" style="font-size: 16px;">
+                                ${lecture.status === 'ended' ? 'check_circle' : 'schedule'}
+                            </span>
+                            ${lecture.status === 'ended' ? 'Ended' : 'Pending'}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <button class="action-button" onclick="deleteLecture(this)" title="Delete">
+                            <span class="material-icons">delete</span>
+                        </button>
+                        <button class="action-button" onclick="toggleLecture(this)" 
+                                title="${lecture.status === 'ended' ? 'Disable' : 'Enable'}">
+                            <span class="material-icons">
+                                ${lecture.status === 'ended' ? 'block' : 'check_circle'}
+                            </span>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteLecture(button) {
+            const row = button.closest('tr');
+            const lectureId = row.cells[0].textContent;
+            
+            if (confirm(`Are you sure you want to delete lecture "${lectureId}"?`)) {
+                console.log('Deleting lecture:', lectureId);
+                // Add your delete API call here
+                row.remove();
+            }
+        }
+
+        function toggleLecture(button) {
+            const row = button.closest('tr');
+            const lectureId = row.cells[0].textContent;
+            const isEnabled = button.title === "Enable";
+            
+            console.log(`${isEnabled ? 'Enabling' : 'Disabling'} lecture:`, lectureId);
+            // Add your toggle API call here
+            
+            // Update button
+            button.title = isEnabled ? "Disable" : "Enable";
+            button.querySelector('.material-icons').textContent = isEnabled ? "block" : "check_circle";
+        }
+    </script>
+</body>
+</html> 
